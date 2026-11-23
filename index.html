@@ -1,0 +1,880 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#101827">
+<title>DOG COMBAT</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: #101827;
+  color: white;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  user-select: none;
+  overflow-x: hidden;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.app {
+  max-width: 480px;
+  margin: auto;
+  min-height: 100vh;
+  padding: 18px 17px 95px;
+  background: linear-gradient(180deg,#15243c,#101827);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.logo span { color: #ffc94a; }
+
+.profile-mini {
+  background: #253550;
+  padding: 9px 13px;
+  border-radius: 15px;
+  font-size: 13px;
+}
+
+.balance-card {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg,#233b5c,#182b46);
+  border: 1px solid #354c6d;
+  border-radius: 22px;
+  margin-bottom: 20px;
+}
+
+.balance-label {
+  color: #aebed5;
+  font-size: 13px;
+}
+
+.balance {
+  font-size: 39px;
+  font-weight: 900;
+  margin: 8px 0;
+  color: #ffd15c;
+}
+
+.currency {
+  font-size: 14px;
+  color: #b8c9e2;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 17px;
+  border-top: 1px solid #40516b;
+  padding-top: 13px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 17px;
+}
+
+.stat small {
+  color: #aabbd2;
+  font-size: 11px;
+}
+
+.dog-area {
+  text-align: center;
+  margin: 15px 0 20px;
+}
+
+.level {
+  display: inline-block;
+  background: #263d5d;
+  border-radius: 20px;
+  padding: 8px 16px;
+  color: #ffd15c;
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 15px;
+}
+
+.dog {
+  width: 245px;
+  height: 245px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 155px;
+  border-radius: 50%;
+  background: radial-gradient(circle,#45648b,#263d5d 65%,#1b2c45);
+  border: 5px solid #4c6484;
+  box-shadow: 0 0 35px #ffc94a22;
+  cursor: pointer;
+  transition: transform .08s;
+  touch-action: manipulation;
+}
+
+.dog:active {
+  transform: scale(.93);
+}
+
+.dog.shake {
+  animation: shake .2s;
+}
+
+@keyframes shake {
+  0% {transform: scale(1)}
+  50% {transform: scale(.92) rotate(-4deg)}
+  100% {transform: scale(1)}
+}
+
+.tap-hint {
+  margin-top: 13px;
+  color: #aabbd2;
+  font-size: 13px;
+}
+
+.energy-section {
+  margin: 18px 0;
+}
+
+.energy-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 9px;
+}
+
+.energy-bar {
+  height: 11px;
+  background: #263750;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.energy-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg,#ffb72c,#ffe16a);
+  transition: width .2s;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+.section-title {
+  font-size: 21px;
+  margin: 17px 0;
+  font-weight: 900;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1c2e48;
+  border: 1px solid #304662;
+  border-radius: 17px;
+  padding: 14px;
+  margin-bottom: 11px;
+}
+
+.item-icon {
+  font-size: 31px;
+  width: 42px;
+  text-align: center;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-info strong {
+  font-size: 14px;
+}
+
+.item-info p {
+  font-size: 12px;
+  color: #a8bad1;
+  margin-top: 5px;
+}
+
+.buy {
+  background: #ffcb50;
+  color: #202b3b;
+  font-weight: 900;
+  padding: 10px 12px;
+  border-radius: 11px;
+  font-size: 12px;
+  min-width: 83px;
+}
+
+.buy:disabled {
+  background: #53627a;
+  color: #aab5c6;
+}
+
+.task-button {
+  background: #304d70;
+  color: white;
+}
+
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: #17263c;
+  border-top: 1px solid #344965;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 4px calc(12px + env(safe-area-inset-bottom));
+  z-index: 10;
+}
+
+.nav button {
+  color: #92a5c0;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  min-width: 55px;
+}
+
+.nav button span {
+  font-size: 22px;
+}
+
+.nav button.active {
+  color: #ffd15c;
+}
+
+.float {
+  position: absolute;
+  pointer-events: none;
+  color: #ffd15c;
+  font-size: 23px;
+  font-weight: bold;
+  animation: floatUp .7s forwards;
+  z-index: 5;
+}
+
+@keyframes floatUp {
+  from {opacity:1; transform:translateY(0)}
+  to {opacity:0; transform:translateY(-85px)}
+}
+
+.vip-card {
+  background: linear-gradient(135deg,#493c25,#8c682c);
+  border-radius: 17px;
+  padding: 17px;
+  margin-bottom: 13px;
+}
+
+.vip-card h3 { color: #ffe19a; }
+.vip-card p { color: #f2d9a7; font-size: 12px; margin-top: 7px; }
+
+.notice {
+  text-align: center;
+  color: #8298b6;
+  font-size: 11px;
+  margin-top: 25px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header class="header">
+    <div class="logo">🐶 DOG <span>COMBAT</span></div>
+    <div class="profile-mini" id="username">Игрок</div>
+  </header>
+
+  <!-- ИГРА -->
+  <main id="game" class="section active">
+
+    <div class="balance-card">
+      <div class="balance-label">ТВОЙ БАЛАНС</div>
+      <div class="balance" id="balance">0</div>
+      <div class="currency">🪙 DOG COINS</div>
+
+      <div class="stats">
+        <div class="stat">
+          <strong id="perTap">1</strong>
+          <small>За клик</small>
+        </div>
+        <div class="stat">
+          <strong id="perHour">0</strong>
+          <small>В час</small>
+        </div>
+        <div class="stat">
+          <strong id="levelNumber">1</strong>
+          <small>Уровень</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="dog-area">
+      <div class="level" id="levelName">🐾 НОВИЧОК</div>
+
+      <div class="dog" id="dog">🐶</div>
+
+      <div class="tap-hint">НАЖИМАЙ НА СОБАКУ И ЗАРАБАТЫВАЙ DOG!</div>
+    </div>
+
+    <div class="energy-section">
+      <div class="energy-info">
+        <strong>⚡ Энергия</strong>
+        <span id="energyText">1000 / 1000</span>
+      </div>
+      <div class="energy-bar">
+        <div class="energy-fill" id="energyFill"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- МАГАЗИН -->
+  <section id="shop" class="section">
+    <div class="section-title">🛒 Магазин улучшений</div>
+    <div id="shopItems"></div>
+  </section>
+
+  <!-- ЗАДАНИЯ -->
+  <section id="tasks" class="section">
+    <div class="section-title">🎯 Задания</div>
+
+    <div class="item">
+      <div class="item-icon">🐾</div>
+      <div class="item-info">
+        <strong>Первое нажатие</strong>
+        <p>Сделай хотя бы один клик</p>
+      </div>
+      <button class="buy task-button" id="task1" onclick="claimTask(1)">+100</button>
+    </div>
+
+    <div class="item">
+      <div class="item-icon">🔥</div>
+      <div class="item-info">
+        <strong>Начинающий боец</strong>
+        <p>Набери 100 нажатий</p>
+      </div>
+      <button class="buy task-button" id="task2" onclick="claimTask(2)">+500</button>
+    </div>
+
+    <div class="item">
+      <div class="item-icon">💪</div>
+      <div class="item-info">
+        <strong>Сильная собака</strong>
+        <p>Набери 1000 DOG</p>
+      </div>
+      <button class="buy task-button" id="task3" onclick="claimTask(3)">+1000</button>
+    </div>
+
+    <div class="item">
+      <div class="item-icon">🏆</div>
+      <div class="item-info">
+        <strong>Покупатель</strong>
+        <p>Купи первое улучшение</p>
+      </div>
+      <button class="buy task-button" id="task4" onclick="claimTask(4)">+500</button>
+    </div>
+  </section>
+
+  <!-- ПРОФИЛЬ -->
+  <section id="profile" class="section">
+    <div class="section-title">👤 Мой профиль</div>
+
+    <div class="balance-card">
+      <div style="font-size:60px">🐶</div>
+      <h2 id="profileName">Игрок</h2>
+      <p style="color:#aabbd2;margin-top:8px">DOG COMBAT PLAYER</p>
+      <div class="balance" id="profileBalance">0 DOG</div>
+    </div>
+
+    <div class="item">
+      <div class="item-icon">🏅</div>
+      <div class="item-info">
+        <strong>VIP-статус</strong>
+        <p id="vipStatus">🥉 Bronze</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-icon">👆</div>
+      <div class="item-info">
+        <strong>Всего нажатий</strong>
+        <p id="totalTaps">0</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="item-icon">🛍️</div>
+      <div class="item-info">
+        <strong>Куплено улучшений</strong>
+        <p id="totalUpgrades">0</p>
+      </div>
+    </div>
+
+    <div class="section-title">💎 VIP-статусы</div>
+    <div id="vipList"></div>
+
+    <div class="notice">
+      VIP-уровень в демо зависит от количества заработанных DOG.
+    </div>
+  </section>
+
+</div>
+
+<!-- НИЖНЕЕ МЕНЮ -->
+<nav class="nav">
+  <button class="active" onclick="openTab('game',this)">
+    <span>🐶</span>Игра
+  </button>
+  <button onclick="openTab('shop',this)">
+    <span>🛒</span>Магазин
+  </button>
+  <button onclick="openTab('tasks',this)">
+    <span>🎯</span>Задания
+  </button>
+  <button onclick="openTab('profile',this)">
+    <span>👤</span>Профиль
+  </button>
+</nav>
+
+<script>
+
+// TELEGRAM
+const tg = window.Telegram?.WebApp;
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+// ИГРОВЫЕ ДАННЫЕ
+const defaultState = {
+  balance: 0,
+  energy: 1000,
+  maxEnergy: 1000,
+  tapPower: 1,
+  passive: 0,
+  taps: 0,
+  upgrades: 0,
+  earned: 0,
+  level: 1,
+  lastTime: Date.now(),
+  lastDaily: "",
+  claimed: [],
+  upgradeLevels: {}
+};
+
+let state;
+
+try {
+  const saved = JSON.parse(localStorage.getItem("dogCombatSave"));
+  state = {...defaultState, ...(saved || {})};
+} catch(e) {
+  state = {...defaultState};
+}
+
+function save() {
+  state.lastTime = Date.now();
+  localStorage.setItem("dogCombatSave", JSON.stringify(state));
+}
+
+function format(n) {
+  return Math.floor(n).toLocaleString("ru-RU");
+}
+
+// ВОССТАНОВЛЕНИЕ ЭНЕРГИИ И ДОХОДА
+function recover() {
+  const now = Date.now();
+  const seconds = Math.max(0, (now - state.lastTime) / 1000);
+
+  state.energy = Math.min(
+    state.maxEnergy,
+    state.energy + seconds
+  );
+
+  const passiveEarned = state.passive * seconds / 3600;
+
+  state.balance += passiveEarned;
+  state.earned += passiveEarned;
+
+  state.lastTime = now;
+}
+
+// УРОВЕНЬ
+function updateLevel() {
+  state.level = Math.max(
+    1,
+    Math.floor(Math.sqrt(state.earned / 1000)) + 1
+  );
+
+  const names = [
+    "НОВИЧОК",
+    "БОЕЦ",
+    "СЛАБЫЙ ПЁС",
+    "СИЛЬНЫЙ ПЁС",
+    "ЧЕМПИОН",
+    "ЛЕГЕНДА"
+  ];
+
+  const name = names[Math.min(state.level - 1, names.length - 1)];
+
+  document.getElementById("levelName").textContent =
+    "🐾 " + name;
+
+  document.getElementById("levelNumber").textContent =
+    state.level;
+}
+
+// ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+function render() {
+  updateLevel();
+
+  document.getElementById("balance").textContent =
+    format(state.balance);
+
+  document.getElementById("perTap").textContent =
+    format(state.tapPower);
+
+  document.getElementById("perHour").textContent =
+    format(state.passive);
+
+  document.getElementById("energyText").textContent =
+    `${Math.floor(state.energy)} / ${state.maxEnergy}`;
+
+  document.getElementById("energyFill").style.width =
+    (state.energy / state.maxEnergy * 100) + "%";
+
+  document.getElementById("profileBalance").textContent =
+    format(state.balance) + " DOG";
+
+  document.getElementById("totalTaps").textContent =
+    format(state.taps);
+
+  document.getElementById("totalUpgrades").textContent =
+    format(state.upgrades);
+
+  renderTasks();
+  renderVIP();
+  renderShop();
+}
+
+// КЛИКЕР
+const dog = document.getElementById("dog");
+
+dog.addEventListener("pointerdown", function(e) {
+  if (state.energy < 1) {
+    if (tg) tg.HapticFeedback?.notificationOccurred("warning");
+    return;
+  }
+
+  state.energy -= 1;
+  state.balance += state.tapPower;
+  state.earned += state.tapPower;
+  state.taps++;
+
+  const float = document.createElement("div");
+  float.className = "float";
+  float.textContent = "+" + format(state.tapPower);
+
+  const rect = dog.getBoundingClientRect();
+
+  float.style.left = (e.clientX || rect.left + rect.width / 2) + "px";
+  float.style.top = (e.clientY || rect.top + rect.height / 2) + "px";
+
+  document.body.appendChild(float);
+
+  setTimeout(() => float.remove(), 700);
+
+  dog.classList.remove("shake");
+  void dog.offsetWidth;
+  dog.classList.add("shake");
+
+  if (tg) tg.HapticFeedback?.impactOccurred("light");
+
+  render();
+  save();
+});
+
+// МАГАЗИН
+const upgrades = [
+  {
+    id:"power",
+    icon:"👊",
+    name:"Сильная лапа",
+    description:"+1 DOG за нажатие",
+    base:100,
+    action:"power"
+  },
+  {
+    id:"energy",
+    icon:"⚡",
+    name:"Энергетик",
+    description:"+500 максимальной энергии",
+    base:250,
+    action:"energy"
+  },
+  {
+    id:"auto",
+    icon:"🤖",
+    name:"Автоматический доход",
+    description:"+100 DOG в час",
+    base:500,
+    action:"auto"
+  },
+  {
+    id:"super",
+    icon:"🔥",
+    name:"Супер лапа",
+    description:"+10 DOG за нажатие",
+    base:1500,
+    action:"super"
+  }
+];
+
+function getCost(item) {
+  const level = state.upgradeLevels[item.id] || 0;
+  return Math.floor(item.base * Math.pow(1.65, level));
+}
+
+function buyUpgrade(id) {
+  const item = upgrades.find(x => x.id === id);
+  const cost = getCost(item);
+
+  if (state.balance < cost) return;
+
+  state.balance -= cost;
+
+  if (!state.upgradeLevels[id]) {
+    state.upgradeLevels[id] = 0;
+  }
+
+  state.upgradeLevels[id]++;
+  state.upgrades++;
+
+  if (item.action === "power") {
+    state.tapPower += 1;
+  }
+
+  if (item.action === "energy") {
+    state.maxEnergy += 500;
+    state.energy = Math.min(
+      state.maxEnergy,
+      state.energy + 500
+    );
+  }
+
+  if (item.action === "auto") {
+    state.passive += 100;
+  }
+
+  if (item.action === "super") {
+    state.tapPower += 10;
+  }
+
+  if (tg) tg.HapticFeedback?.notificationOccurred("success");
+
+  render();
+  save();
+}
+
+function renderShop() {
+  const container = document.getElementById("shopItems");
+
+  container.innerHTML = upgrades.map(item => {
+    const cost = getCost(item);
+    const level = state.upgradeLevels[item.id] || 0;
+
+    return `
+      <div class="item">
+        <div class="item-icon">${item.icon}</div>
+        <div class="item-info">
+          <strong>${item.name}</strong>
+          <p>${item.description}</p>
+          <p>Уровень: ${level}</p>
+        </div>
+        <button class="buy"
+          ${state.balance < cost ? "disabled" : ""}
+          onclick="buyUpgrade('${item.id}')">
+          🪙 ${format(cost)}
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+// ЗАДАНИЯ
+const tasks = [
+  {id:1, reward:100, condition:() => state.taps >= 1},
+  {id:2, reward:500, condition:() => state.taps >= 100},
+  {id:3, reward:1000, condition:() => state.earned >= 1000},
+  {id:4, reward:500, condition:() => state.upgrades >= 1}
+];
+
+function claimTask(id) {
+  const task = tasks.find(t => t.id === id);
+
+  if (!task || state.claimed.includes(id)) return;
+  if (!task.condition()) return;
+
+  state.claimed.push(id);
+  state.balance += task.reward;
+  state.earned += task.reward;
+
+  render();
+  save();
+}
+
+function renderTasks() {
+  tasks.forEach(task => {
+    const btn = document.getElementById("task" + task.id);
+    if (!btn) return;
+
+    const claimed = state.claimed.includes(task.id);
+    const ready = task.condition();
+
+    btn.disabled = claimed || !ready;
+    btn.textContent = claimed ? "✓" :
+      ready ? "Забрать" : "+" + task.reward;
+  });
+}
+
+// VIP
+const vipLevels = [
+  {name:"🥉 Bronze", amount:1000},
+  {name:"🥈 Silver", amount:10000},
+  {name:"🥇 Gold", amount:50000},
+  {name:"💎 Diamond", amount:100000},
+  {name:"👑 Elite", amount:500000}
+];
+
+function renderVIP() {
+  let current = "🐾 Новичок";
+
+  vipLevels.forEach(vip => {
+    if (state.earned >= vip.amount) {
+      current = vip.name;
+    }
+  });
+
+  document.getElementById("vipStatus").textContent = current;
+
+  document.getElementById("vipList").innerHTML =
+    vipLevels.map(vip => `
+      <div class="vip-card">
+        <h3>${vip.name}</h3>
+        <p>Необходимо заработать: ${format(vip.amount)} DOG</p>
+        <p>${state.earned >= vip.amount ? "✓ Получен" : "🔒 Ещё не открыт"}</p>
+      </div>
+    `).join("");
+}
+
+// ЕЖЕДНЕВНАЯ НАГРАДА
+function dailyReward() {
+  const today = new Date().toLocaleDateString("en-CA");
+
+  if (state.lastDaily === today) {
+    alert("Ты уже получил ежедневную награду!");
+    return;
+  }
+
+  state.lastDaily = today;
+  state.balance += 500;
+  state.earned += 500;
+
+  save();
+  render();
+
+  alert("🎁 Ты получил 500 DOG!");
+}
+
+// ВКЛАДКИ
+function openTab(id, button) {
+  document.querySelectorAll(".section").forEach(s => {
+    s.classList.remove("active");
+  });
+
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".nav button").forEach(b => {
+    b.classList.remove("active");
+  });
+
+  button.classList.add("active");
+}
+
+// ИМЯ TELEGRAM
+if (tg?.initDataUnsafe?.user) {
+  const user = tg.initDataUnsafe.user;
+  const name = user.first_name || "Игрок";
+
+  document.getElementById("username").textContent = name;
+  document.getElementById("profileName").textContent = name;
+}
+
+// ДОБАВЛЕНИЕ ЕЖЕДНЕВНОЙ НАГРАДЫ В ПРОФИЛЬ
+const dailyButton = document.createElement("button");
+dailyButton.className = "buy";
+dailyButton.style.width = "100%";
+dailyButton.style.padding = "16px";
+dailyButton.style.marginTop = "12px";
+dailyButton.textContent = "🎁 Получить ежедневную награду";
+dailyButton.onclick = dailyReward;
+
+document.getElementById("profile").appendChild(dailyButton);
+
+// ТИК ИГРЫ
+function gameTick() {
+  recover();
+  render();
+  save();
+}
+
+render();
+gameTick();
+setInterval(gameTick, 1000);
+
+</script>
+</body>
+</html>
